@@ -1,1 +1,27 @@
-{"nbformat":4,"nbformat_minor":0,"metadata":{"colab":{"provenance":[],"authorship_tag":"ABX9TyMjoyCo7zff5sxZvroh2lD3"},"kernelspec":{"name":"python3","display_name":"Python 3"},"language_info":{"name":"python"}},"cells":[{"cell_type":"code","execution_count":1,"metadata":{"id":"X0XOWmL63-JI","colab":{"base_uri":"https://localhost:8080/"},"executionInfo":{"status":"ok","timestamp":1723706014788,"user_tz":-330,"elapsed":67650,"user":{"displayName":"HARSH JETHWA","userId":"12315150990572674590"}},"outputId":"a7323f9d-5cdb-43b9-8338-15737741d178"},"outputs":[{"output_type":"stream","name":"stderr","text":["/usr/local/lib/python3.10/dist-packages/keras/src/layers/core/dense.py:87: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.\n","  super().__init__(activity_regularizer=activity_regularizer, **kwargs)\n"]},{"output_type":"stream","name":"stdout","text":["\u001b[1m1/1\u001b[0m \u001b[32m━━━━━━━━━━━━━━━━━━━━\u001b[0m\u001b[37m\u001b[0m \u001b[1m0s\u001b[0m 59ms/step\n","X=[0.29466096 0.30317302], Predicted=[0.18176797]\n","X=[0.39445118 0.79390858], Predicted=[0.75737196]\n","X=[0.02884127 0.6208843 ], Predicted=[0.393544]\n"]}],"source":["# Practical 4\n","# 4C\n","# Using deep feed forward network with two hidden layers for performing linear regression and predicting values.\n","from keras.models import Sequential\n","from keras.layers import Dense\n","from sklearn.datasets import make_regression\n","from sklearn.preprocessing import MinMaxScaler\n","X,Y=make_regression(n_samples=100,n_features=2,noise=0.1,random_state=1)\n","scalarX, scalarY=MinMaxScaler(), MinMaxScaler()\n","scalarX.fit(X)\n","scalarY.fit(Y.reshape(100,1))\n","X=scalarX.transform(X)\n","Y=scalarY.transform(Y.reshape(100,1))\n","model=Sequential()\n","model.add(Dense(4,input_dim=2,activation='relu'))\n","model.add(Dense(4,activation='relu'))\n","model.add(Dense(1,activation='sigmoid'))\n","model.compile(loss='mse', optimizer='adam')\n","model.fit(X, Y, epochs=1000, verbose=0)\n","Xnew,a=make_regression(n_samples=3,n_features = 2,noise=0.1,random_state=1)\n","Xnew=scalarX.transform(Xnew)\n","Ynew = model.predict(Xnew)\n","for i in range(len(Xnew)):\n","    print(\"X=%s, Predicted=%s\"%(Xnew[i], Ynew[i]))\n"]},{"cell_type":"code","source":[],"metadata":{"id":"InU_Gxt33_hz"},"execution_count":null,"outputs":[]},{"cell_type":"code","source":[],"metadata":{"id":"XbFXubxV3_k6"},"execution_count":null,"outputs":[]},{"cell_type":"code","source":[],"metadata":{"id":"uwXN543Z3_ne"},"execution_count":null,"outputs":[]},{"cell_type":"code","source":[],"metadata":{"id":"q-3edCZp3_p9"},"execution_count":null,"outputs":[]},{"cell_type":"code","source":[],"metadata":{"id":"f6oiGeet3_sk"},"execution_count":null,"outputs":[]},{"cell_type":"code","source":[],"metadata":{"id":"sqR4yFRY3_vM"},"execution_count":null,"outputs":[]},{"cell_type":"code","source":[],"metadata":{"id":"a4dD0v2c3_ym"},"execution_count":null,"outputs":[]}]}
+# Practical 4
+# 4C
+# Using deep feed forward network with two hidden layers for performing linear regression and predicting values.
+from keras.models import Sequential
+from keras.layers import Dense
+from sklearn.datasets import make_regression
+from sklearn.preprocessing import MinMaxScaler
+X,Y=make_regression(n_samples=100,n_features=2,noise=0.1,random_state=1)
+scalarX, scalarY=MinMaxScaler(), MinMaxScaler()
+scalarX.fit(X)
+scalarY.fit(Y.reshape(100,1))
+X=scalarX.transform(X)
+Y=scalarY.transform(Y.reshape(100,1))
+model=Sequential()
+model.add(Dense(4,input_dim=2,activation='relu'))
+model.add(Dense(4,activation='relu'))
+model.add(Dense(1,activation='sigmoid'))
+model.compile(loss='mse', optimizer='adam')
+model.fit(X, Y, epochs=1000, verbose=0)
+Xnew,a=make_regression(n_samples=3,n_features = 2,noise=0.1,random_state=1)
+Xnew=scalarX.transform(Xnew)
+Ynew = model.predict(Xnew)
+for i in range(len(Xnew)):
+    print("X=%s, Predicted=%s"%(Xnew[i], Ynew[i]))
+
+
+
