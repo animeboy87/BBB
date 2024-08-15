@@ -1,39 +1,55 @@
 # Practical 7
 # Demonstrate recurrent neural network that learns to perform sequence analysis for stock price.
-import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
-rain_data = np.array([2.3, 1.5, 3.1, 2.0, 2.5, 1.7, 2.9, 3.5, 3.0, 2.1,
-                      2.5, 2.2, 2.8, 3.2, 1.8, 2.7, 1.9, 3.1, 3.3, 2.0,
-                      2.5, 2.2, 2.4, 3.0, 2.1, 2.5, 3.2, 3.1, 1.9, 2.7,
-                      2.2, 2.8, 3.1, 2.0, 2.5, 1.7, 2.9, 3.5, 3.0, 2.1,
-                      2.5, 2.2, 2.8, 3.2, 1.8, 2.7, 1.9, 3.1, 3.3, 2.0])
-def create_sequences(values, time_steps):
-    x=[]
-    y=[]
-    for i in range(len(values)-time_steps):
-        x.append(values[i:i+time_steps])
-        y.append(values[i+time_steps])
-    return np.array(x),np.array(y)
-time_steps=4
-x_train, y_train=create_sequences(rain_data, time_steps)
-
-model=tf.keras.Sequential([
-    tf.keras.layers.SimpleRNN(8, input_shape=(time_steps,1)),
-    tf.keras.layers.Dense(1)
-])
-model.compile(optimizer="adam", loss="mse")
-history=model.fit(x_train.reshape(-1, time_steps, 1), y_train, epochs=200)
-loss=history.history["loss"]
-epochs=range(1, len(loss)+1)
-plt.plot(epochs, loss, "bo", label="Training loss")
-plt.title("Training loss")
+import pandas as pd
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import LSTM
+from keras.layers import Dropout
+from sklearn.preprocessing import MinMaxScaler
+dataset_train=pd.read_csv('/content/Google_Stock_Price_Train.csv')
+training_set=dataset_train.iloc[:,1:2].values
+sc=MinMaxScaler(feature_range=(0,1))
+training_set_scaled=sc.fit_transform(training_set)
+X_train=[]
+Y_train=[]
+for i in range(60,1258):
+  X_train.append(training_set_scaled[i-60:i,0])
+  Y_train.append(training_set_scaled[i,0])
+X_train,Y_train = np.array(X_train),np.array(Y_train)
+print(X_train)
+print(Y_train)
+X_train = np.reshape(X_train,(X_train.shape[0],X_train.shape[1],1))
+print(X_train)
+regressor=Sequential()
+regressor.add(LSTM(units=50, return_sequences=True, input_shape=(X_train.shape[1],1)))
+regressor.add(Dropout(0.2))
+regressor.add(LSTM(units=50, return_sequences=True))
+regressor.add(Dropout(0.2))
+regressor.add(LSTM(units=50, return_sequences=True))
+regressor.add(Dropout(0.2))
+regressor.add(LSTM(units=50))
+regressor.add(Dropout(0.2))
+regressor.add(Dense(units=1))
+regressor.compile(optimizer ='adam',loss='mean_squared_error') 
+regressor.fit(X_train,Y_train, epochs=100,batch_size=32)
+dataset_test=pd.read_csv('/content/Google_Stock_Price_Train.csv')
+real_stock_price=dataset_test.iloc[:, 1:2].values
+dataset_total=pd.concat((dataset_train['Open'], dataset_test['Open']),axis=0)
+inputs=dataset_total[len(dataset_total)-len(dataset_test)-60:].values 
+inputs=inputs.reshape(-1,1)
+inputs=sc.transform(inputs)
+X_test=[]
+for i in range(60,80):
+  X_test.append(inputs[i-60:i,0]) 
+X_test=np.array(X_test)
+X_test=np.reshape(X_test,(X_test.shape[0],X_test.shape[1],1))
+predicted_stock_price=regressor.predict(X_test)
+predicted_stock_price=sc.inverse_transform(predicted_stock_price)
+plt.plot(real_stock_price,color='red',label='real google stock price') 
+plt.plot(predicted_stock_price,color='blue',label='predicted stock price')
+plt.xlabel('time')
+plt.ylabel('google stock price')
 plt.legend()
 plt.show()
-test_sequence=np.array([2.2,2.5,3.2,2.2])
-x_test=np.array([test_sequence])
-y_test=model.predict(x_test.reshape(-1, time_steps, 1))
-print("Previous days' rain data:", test_sequence)
-print("Expected rain amount for next day:", y_test[0][0])
-prediction=model.predict(np.array([test_sequence]).reshape(1, time_steps, 1))
-print("Prediction:", prediction[0][0])
